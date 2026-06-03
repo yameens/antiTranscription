@@ -1,0 +1,15 @@
+C5 eigth
+D5 eigth
+C5 eigth
+B4 eigth
+A4 eigth
+B4 eigth
+C5 quarter
+G4 eigth
+A4 eigth
+B4 quarter
+A4 eigth
+G4 eigth
+C5 quarter
+
+

@@ -29,3 +29,15 @@ results/
 # ide
 .vscode/
 .idea/
+
+# primus dataset (large, re-downloadable)
+package_aa/
+package_ab/
+*.tgz
+
+# training crops and model checkpoint (generated, large)
+data/crops/
+data/best_model.pt
+
+# cursor / agent tooling
+.cursor/
