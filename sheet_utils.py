@@ -42,7 +42,6 @@ LOCAL_IMAGES: list[tuple[str, str]] = [
     ("twinkleTwinkleLittleStar", "twinkleTwinkleLittleStar.txt"),
     ("maryHadLittleLamb",        "marryHadLittleLamb.txt"),
     ("cs131",                    "cs131.txt"),
-    ("londonBridgeIsFalling",    "londonBridgeIsFalling.txt"),
 ]
 
 # stave detection parameters

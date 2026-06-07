@@ -591,15 +591,26 @@ def train(
     from collections import Counter
     counts = Counter(CLASS_TO_IDX.get(r[1], CLASS_TO_IDX["other"])
                      for r in train_rows)
-    # sqrt-inverse frequency weighting: gives rare classes a gentle 3-5x boost
-    # rather than the raw 800x ratio from the old formula, which caused training
-    # to destabilize and decay after epoch 3.
-    freqs = torch.tensor([counts.get(i, 1) for i in range(N_CLASSES)],
-                         dtype=torch.float32)
-    weights = (1.0 / freqs).sqrt()
-    weights = weights / weights.mean()  # center around 1.0
-    weights = weights.clamp(max=5.0)   # cap so no class hijacks the gradient
-    weights = weights.to(device)
+    # sqrt-inverse frequency weighting over POPULATED classes only.
+    # classes with zero training samples must be excluded from weighting:
+    # the counts.get(i, 1) fallback that was previously used gave empty
+    # classes a count of 1, which after sqrt-inverse + normalization produced
+    # weights ~133x larger than the dominant note class.  that caused the
+    # model to optimise toward empty-class logits and achieve 0% accuracy.
+    populated = {i for i in range(N_CLASSES) if counts.get(i, 0) > 0}
+    raw = torch.zeros(N_CLASSES, dtype=torch.float32)
+    for i in populated:
+        raw[i] = (1.0 / counts[i]) ** 0.5
+    # normalise so populated-class weights centre around 1.0
+    pop_mean = raw[list(populated)].mean()
+    raw = raw / pop_mean
+    raw = raw.clamp(max=5.0)
+    # empty classes get weight 1.0 (neutral — model can freely predict them
+    # but receives no exaggerated gradient push to do so)
+    for i in range(N_CLASSES):
+        if i not in populated:
+            raw[i] = 1.0
+    weights = raw.to(device)
 
     model = SymbolCNN(n_classes=N_CLASSES, img_size=IMG_SIZE).to(device)
     criterion = nn.CrossEntropyLoss(weight=weights, label_smoothing=0.1)

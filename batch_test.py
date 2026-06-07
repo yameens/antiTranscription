@@ -16,7 +16,6 @@ SHEET = os.path.join(BASE, "sheet music")
 
 IMAGES = [
     ("cs131",                   "cs131.jpg"),
-    ("londonBridgeIsFalling",   "londonBridgeIsFalling.jpg"),
     ("maryHadLittleLamb",       "maryHadLittleLamb.jpg"),
     ("twinkleTwinkleLittleStar","twinkleTwinkleLittleStar.jpg"),
     ("yankeeDoodle",            "yankeeDoodle.jpg"),

@@ -27,7 +27,6 @@ IMAGES = [
     "twinkleTwinkleLittleStar",
     "maryHadLittleLamb",
     "cs131",
-    "londonBridgeIsFalling",
 ]
 
 DEFAULT_STAVE_PARAMS = dict(

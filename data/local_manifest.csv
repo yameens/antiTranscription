@@ -35,6 +35,10 @@ path,label
 /Users/yameensekandari/Desktop/CS131 Final Project/data/crops/yankeeDoodle_0033.png,other
 /Users/yameensekandari/Desktop/CS131 Final Project/data/crops/yankeeDoodle_0034.png,other
 /Users/yameensekandari/Desktop/CS131 Final Project/data/crops/yankeeDoodle_0035.png,other
+/Users/yameensekandari/Desktop/CS131 Final Project/data/crops/yankeeDoodle_0036.png,other
+/Users/yameensekandari/Desktop/CS131 Final Project/data/crops/yankeeDoodle_0037.png,other
+/Users/yameensekandari/Desktop/CS131 Final Project/data/crops/yankeeDoodle_0038.png,other
+/Users/yameensekandari/Desktop/CS131 Final Project/data/crops/yankeeDoodle_0039.png,other
 /Users/yameensekandari/Desktop/CS131 Final Project/data/crops/twinkleTwinkleLittleStar_0000.png,note_quarter
 /Users/yameensekandari/Desktop/CS131 Final Project/data/crops/twinkleTwinkleLittleStar_0001.png,note_quarter
 /Users/yameensekandari/Desktop/CS131 Final Project/data/crops/twinkleTwinkleLittleStar_0002.png,note_quarter
@@ -64,7 +68,6 @@ path,label
 /Users/yameensekandari/Desktop/CS131 Final Project/data/crops/twinkleTwinkleLittleStar_0026.png,other
 /Users/yameensekandari/Desktop/CS131 Final Project/data/crops/twinkleTwinkleLittleStar_0027.png,other
 /Users/yameensekandari/Desktop/CS131 Final Project/data/crops/twinkleTwinkleLittleStar_0028.png,other
-/Users/yameensekandari/Desktop/CS131 Final Project/data/crops/twinkleTwinkleLittleStar_0029.png,other
 /Users/yameensekandari/Desktop/CS131 Final Project/data/crops/maryHadLittleLamb_0000.png,note_eighth
 /Users/yameensekandari/Desktop/CS131 Final Project/data/crops/maryHadLittleLamb_0001.png,note_eighth
 /Users/yameensekandari/Desktop/CS131 Final Project/data/crops/maryHadLittleLamb_0002.png,note_eighth
@@ -81,9 +84,6 @@ path,label
 /Users/yameensekandari/Desktop/CS131 Final Project/data/crops/maryHadLittleLamb_0013.png,other
 /Users/yameensekandari/Desktop/CS131 Final Project/data/crops/maryHadLittleLamb_0014.png,other
 /Users/yameensekandari/Desktop/CS131 Final Project/data/crops/maryHadLittleLamb_0015.png,other
-/Users/yameensekandari/Desktop/CS131 Final Project/data/crops/maryHadLittleLamb_0016.png,other
-/Users/yameensekandari/Desktop/CS131 Final Project/data/crops/maryHadLittleLamb_0017.png,other
-/Users/yameensekandari/Desktop/CS131 Final Project/data/crops/maryHadLittleLamb_0018.png,other
 /Users/yameensekandari/Desktop/CS131 Final Project/data/crops/cs131_0000.png,note_quarter
 /Users/yameensekandari/Desktop/CS131 Final Project/data/crops/cs131_0001.png,note_quarter
 /Users/yameensekandari/Desktop/CS131 Final Project/data/crops/cs131_0002.png,note_half
@@ -96,17 +96,3 @@ path,label
 /Users/yameensekandari/Desktop/CS131 Final Project/data/crops/cs131_0009.png,note_quarter
 /Users/yameensekandari/Desktop/CS131 Final Project/data/crops/cs131_0010.png,note_quarter
 /Users/yameensekandari/Desktop/CS131 Final Project/data/crops/cs131_0011.png,note_quarter
-/Users/yameensekandari/Desktop/CS131 Final Project/data/crops/cs131_0012.png,note_quarter
-/Users/yameensekandari/Desktop/CS131 Final Project/data/crops/londonBridgeIsFalling_0000.png,note_eighth
-/Users/yameensekandari/Desktop/CS131 Final Project/data/crops/londonBridgeIsFalling_0001.png,note_eighth
-/Users/yameensekandari/Desktop/CS131 Final Project/data/crops/londonBridgeIsFalling_0002.png,note_eighth
-/Users/yameensekandari/Desktop/CS131 Final Project/data/crops/londonBridgeIsFalling_0003.png,note_eighth
-/Users/yameensekandari/Desktop/CS131 Final Project/data/crops/londonBridgeIsFalling_0004.png,note_eighth
-/Users/yameensekandari/Desktop/CS131 Final Project/data/crops/londonBridgeIsFalling_0005.png,note_eighth
-/Users/yameensekandari/Desktop/CS131 Final Project/data/crops/londonBridgeIsFalling_0006.png,note_quarter
-/Users/yameensekandari/Desktop/CS131 Final Project/data/crops/londonBridgeIsFalling_0007.png,note_eighth
-/Users/yameensekandari/Desktop/CS131 Final Project/data/crops/londonBridgeIsFalling_0008.png,note_eighth
-/Users/yameensekandari/Desktop/CS131 Final Project/data/crops/londonBridgeIsFalling_0009.png,note_quarter
-/Users/yameensekandari/Desktop/CS131 Final Project/data/crops/londonBridgeIsFalling_0010.png,note_eighth
-/Users/yameensekandari/Desktop/CS131 Final Project/data/crops/londonBridgeIsFalling_0011.png,note_eighth
-/Users/yameensekandari/Desktop/CS131 Final Project/data/crops/londonBridgeIsFalling_0012.png,note_quarter

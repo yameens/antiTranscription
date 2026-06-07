@@ -34,7 +34,6 @@ print("Generating Figure 1: rectification grid ...")
 RECT_IMAGES = [
     ("Yankee Doodle",               "yankeeDoodle"),
     ("Mary Had a Little Lamb",      "maryHadLittleLamb"),
-    ("London Bridge Is Falling",    "londonBridgeIsFalling"),
     ("Twinkle Twinkle Little Star", "twinkleTwinkleLittleStar"),
     ("CS 131",                      "cs131"),
 ]
@@ -78,7 +77,7 @@ mask_otsu = _segment_page_otsu(blur_pipe)
 kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (25, 25))
 mask_closed = cv2.morphologyEx(mask_otsu, cv2.MORPH_CLOSE, kernel)
 
-corners = _find_page_corners(img_pipe)
+corners, _method, _sealed = _find_page_corners(img_pipe)
 overlay = img_pipe.copy()
 pts = corners.astype(np.int32).reshape(-1, 1, 2)
 cv2.polylines(overlay, [pts], isClosed=True, color=(0, 0, 220), thickness=12)

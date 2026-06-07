@@ -23,7 +23,6 @@ os.makedirs(OUTDIR, exist_ok=True)
 IMAGES = [
     "yankeeDoodle",
     "twinkleTwinkleLittleStar",
-    "londonBridgeIsFalling",
     "maryHadLittleLamb",
     "cs131",
 ]
