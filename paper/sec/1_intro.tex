@@ -1,0 +1,42 @@
+\section{Introduction}
+\label{sec:intro}
+
+A huge amount of music is only available as a printed score, rather than a
+machine-readable encoding. Optical Music Recognition (OMR)---the automatic
+transformation of scanned images of a score into a symbolic form such as MIDI or
+MusicXML---can make these works playable, transposable, searchable, and
+accessible~\cite{calvo2020understanding}. Although commercial OMR engines excel
+at clear scanner output, the most ubiquitous capture device today is the camera
+on a phone, which suffers from perspective distortion, varied lighting, shadows,
+and sensor noise. This gap between the clean documents upon which OMR engines are
+trained and tested, and the messy photos users provide, is, I argue, the primary
+reason OMR is not practical.
+
+In this paper, I measure this gap directly. I build \emph{antiTranscription}, a
+pipeline that takes a hand-held photo of monophonic printed sheet music taken
+with a phone and produces a MIDI file. It includes both geometric vision
+components (rectification, Hough staff detection, morphological segmentation,
+geometric pitch inference) and a trained convolutional classifier; this allows
+me to distinguish those pipeline components which make a smooth transition from
+clean to real photographic images from those that do not.
+
+My experiments highlight a stark dichotomy. While my geometric vision stages
+perform robustly (all five photos correctly rectified with sub-degree slant, and
+every staff detected), my appearance-based classifier decreases from a top
+accuracy of $58.9\%$ on clean PrIMuS glyphs~\cite{calvo2018primus} to $22.7\%$ on
+crops from real photographs, a drop of $36.2$ points, which is most pronounced on
+thin or hollow glyphs. I show that a segmentation-free pitch reader using only
+the geometry of noteheads takes advantage of this by achieving $86\%$ accuracy on
+a representative piece, compared to the $14\%$ accuracy of the purely
+appearance-based approach.
+
+\paragraph{Contributions.}
+(i) A complete five-stage phone-photo-to-MIDI pipeline combining classical
+geometry with a learned classifier; (ii) a robust rectification cascade and
+Hough/clustering staff detector succeeding on $100\%$ of my real test photos;
+(iii) a quantified \emph{clean-to-real domain-gap study} for OMR symbol
+classification ($58.9\%\!\rightarrow\!22.7\%$) with per-class analysis of where
+appearance models break; and (iv) a geometry-grounded, segmentation-free pitch
+reader that improves exact pitch accuracy $6\times$ ($14\%\!\rightarrow\!86\%$)
+over that baseline. I scope the system to monophonic treble-clef scores without
+accidentals or key signatures, isolating perception from full musical parsing.

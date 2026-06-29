@@ -1,0 +1,33 @@
+\section{Related Work}
+\label{sec:related}
+
+\paragraph{Classical OMR.}
+Classical OMR relies on human-designed stages to perform recognition:
+binarization, staff removal and detection, symbol segmentation, and musical
+reconstruction~\cite{rebelo2012state,calvo2020understanding}. Staff-line
+locations are found with projection profiles, run-length encoding, or Hough
+transforms~\cite{duda1972hough} and then removed morphologically, after which
+symbols can be detected by connected components~\cite{suzuki1985contours}. My
+geometry stages are in this tradition; I have built the pipeline with an
+engineered phone-capture correction system, with both a front-end rectification
+and a post-pipeline stave confirmation by a spacing-consistency check.
+
+\paragraph{Deep and end-to-end OMR.}
+Neural sequence models are recent additions to the OMR literature. Calvo-Zaragoza
+and Rizo first developed a full end-to-end monophonic OMR CRNN for the PrIMuS
+corpus~\cite{calvo2018primus}; van der Wel and Ullrich propose a convolutional
+seq-to-seq model for music transcription~\cite{vanderwel2017seq2seq}; Bar\'o et
+al.\ use these ideas for handwritten music notation~\cite{baro2019handwritten};
+and glyph-based detectors frame glyph locations as boxes~\cite{pacha2018baseline}.
+PrIMuS provides the source for the clean symbols in my training data; I do not
+use a full sequence model, instead using a CNN~\cite{lecun1998gradient} for the
+discrete pitch-identification task to serve as a controlled probe for how
+training from clean symbols transfers to photos.
+
+\paragraph{Domain shift.}
+A major topic in vision is overcoming the mismatch between training and
+deployment domains through unsupervised domain adaptation~\cite{ganin2015dann},
+and in OMR this gap has been addressed by creating synthetically distorted
+``camera'' versions of the PrIMuS corpus. I introduce an explicit per-class
+quantitative measure of this clean-to-real gap in photos, and demonstrate how my
+geometry-based pitch-detection approach largely sidesteps it.

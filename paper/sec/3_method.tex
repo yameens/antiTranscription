@@ -1,0 +1,111 @@
+\section{Methodology}
+\label{sec:method}
+
+The pipeline consists of five steps. I detail each below, pointing out the
+formulas that define its geometry.
+
+\subsection{Perspective Rectification}
+\label{sec:method:rectify}
+I first warp the phone image to a fronto-parallel view. I binarize the page from
+the background using Otsu's method, which finds the threshold $t^\star$ that
+maximizes the between-class variance
+\begin{equation}
+  t^\star = \arg\max_{t}\; \omega_0(t)\,\omega_1(t)\,\big[\mu_0(t)-\mu_1(t)\big]^2,
+  \label{eq:otsu}
+\end{equation}
+where $\omega_i$ and $\mu_i$ represent the probability mass and mean of the two
+pixel classes separated by $t$~\cite{otsu1979threshold}. The four corners of the
+page are extracted from the page mask via a cascade of increasingly liberal
+detectors: intersections between Hough lines~\cite{duda1972hough}, polygonal
+approximation of the contours~\cite{suzuki1985contours}, and the minimum-area
+bounding rectangle. The first of these to result in a sufficiently large convex
+quadrilateral is selected. They determine a $3\times3$ homography $\mathbf{H}$
+that transforms any source point $\mathbf{x}=(x,y,1)^\top$ into the rectified
+space as
+\begin{equation}
+  \tilde{\mathbf{x}}' \simeq \mathbf{H}\,\tilde{\mathbf{x}},
+  \qquad
+  x' = \frac{h_{11}x+h_{12}y+h_{13}}{h_{31}x+h_{32}y+h_{33}},
+  \label{eq:homography}
+\end{equation}
+where $y'$ is defined analogously~\cite{hartley2004multiple}. I check that a
+rectification is valid by computing the residual slant of staff lines in the
+warped image and by counting the fraction of background pixels which overlap with
+the border of the page.
+
+\subsection{Staff Detection}
+\label{sec:method:staves}
+On the rectified page I use adaptive thresholding and then the Hough line
+transform, which allows each edge pixel to vote for the lines that pass through it
+\begin{equation}
+  \rho = x\cos\theta + y\sin\theta .
+  \label{eq:hough}
+\end{equation}
+Horizontal line candidates ($\theta\approx 90^{\circ}$) are grouped by their
+$y$-intercept and combined to form five-line staves. A group of five line
+candidates is a stave if the spacing $d_k$ between the $k$-th and $(k{+}1)$-th
+line does not vary too much, measured by the coefficient of variation
+\begin{equation}
+  \mathrm{CV} = \frac{\sigma_d}{\mu_d} < 0.4 .
+  \label{eq:cv}
+\end{equation}
+The average spacing, $s=\mu_d$, provides the fundamental length scale for all
+subsequent steps.
+
+\subsection{Staff Removal and Segmentation}
+\label{sec:method:segment}
+The staff lines are removed by suppressing thin horizontal runs. The gaps this
+creates in the note stems are bridged using a vertical morphological closing of
+height $\approx s$. Connected components are then extracted as
+symbols~\cite{suzuki1985contours}, and rejected if their area, relative to $s^2$,
+indicates they are noise.
+
+\subsection{Symbol Classification}
+\label{sec:method:cnn}
+The $64\times64$ binary images of symbols are passed through \textsc{SymbolCNN},
+a four-layer convolution--batchnorm--pooling CNN followed by two fully connected
+layers. This is trained using $35{,}933$ crops from PrIMuS~\cite{calvo2018primus},
+labelled with nine possible symbols: whole, half, quarter, and eighth notes; four
+different rest types; and \emph{other}. Since the classes are not balanced, I
+minimize a weighted cross-entropy loss
+\begin{equation}
+  \mathcal{L} = -\sum_{c} w_c\, y_c \log \hat{y}_c,
+  \qquad
+  w_c \propto \frac{1}{\sqrt{n_c}},
+  \label{eq:wce}
+\end{equation}
+where $n_c$ is the number of crops in class $c$, which weights the less common
+classes more heavily. I assign each crop its correct label based on a strict rule
+and discard potentially ambiguous symbol--image pairs.
+
+\subsection{Pitch Inference and a Geometry-Only Reader}
+\label{sec:method:pitch}
+Given the centroid of a notehead located at pixel $y_{\text{head}}$ and the stave
+containing it, whose bottom line is at pixel $y_{\text{bottom}}$, I calculate its
+position on the stave (in units of half-spaces)
+\begin{equation}
+  p = \mathrm{round}\!\left(\frac{y_{\text{bottom}}-y_{\text{head}}}{s/2}\right).
+  \label{eq:staffpos}
+\end{equation}
+I map a position on a treble-clef staff (bottom line E4) to a MIDI number by a
+deterministic mapping, and provide the associated note duration as determined by
+the classifier.
+
+\paragraph{Geometry-only reader.}
+Since I find that classification is the least robust step
+(Sec.~\ref{sec:results}), I present a reader that performs segmentation-free pitch
+inference. After a preliminary filling-in of noteheads using connected-component
+analysis on the background pixels, I locate candidates using normalized
+cross-correlation with a synthetic ellipse $T$ of size proportional to $s$
+\begin{equation}
+  R(u,v) = \frac{\sum_{i,j} \big(I_{u,v}(i,j)-\bar I_{u,v}\big)\big(T(i,j)-\bar T\big)}
+                {\sqrt{\sum_{i,j}\big(I_{u,v}(i,j)-\bar I_{u,v}\big)^2\;\sum_{i,j}\big(T(i,j)-\bar T\big)^2}},
+  \label{eq:ncc}
+\end{equation}
+where $I_{u,v}$ refers to the image patch at $(u,v)$ beneath the template.
+Candidates at peaks of $R$ are found and their neighbors removed with greedy
+non-maximum suppression. I discard detections of time signatures or clef margins,
+and I filter rests and stems based on their solidity: candidates that remain
+solid under a notehead-sized opening are likely true noteheads. Final candidates
+are mapped to their MIDI pitch using Eq.~\eqref{eq:staffpos} and staff-position
+information.

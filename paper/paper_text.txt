@@ -1,0 +1,351 @@
+================================================================================
+TITLE
+================================================================================
+From Phone Photo to MIDI: A Five-Stage Optical Music Recognition Pipeline
+and a Study of the Clean-to-Real Domain Gap
+
+Author: Yameen Sekandari
+Stanford University
+CS 131: Computer Vision, Spring 2026
+yameen@stanford.edu
+
+
+================================================================================
+ABSTRACT
+================================================================================
+We present antiTranscription, an end-to-end computer-vision pipeline that
+converts an ordinary phone photograph of printed sheet music into a playable
+MIDI file. The system chains five classical and learned stages: (i) perspective
+rectification through a robust page-corner cascade and homography; (ii)
+staff-line detection via the Hough transform and five-line clustering; (iii)
+morphological staff removal and connected-component symbol segmentation; (iv) a
+convolutional symbol classifier trained on 35,933 glyph crops mined from the
+PrIMuS corpus; and (v) geometric pitch inference and MIDI synthesis. On five
+real phone photos the geometry stages are highly reliable (rectification passes
+5/5, slant <= 0.22 degrees; staff detection succeeds on every page), but our
+central finding is a large clean-to-real domain gap: the symbol classifier that
+reaches 58.9% validation accuracy on clean glyphs collapses to 22.7% on real
+crops, a 36.2-point drop concentrated in fragile classes such as hollow half
+notes (0%). Motivated by this, we introduce a segmentation-free,
+geometry-grounded pitch reader using template-matched notehead localization,
+which raises exact pitch accuracy on a test piece from 14% to 86% (89% within
+one step). For phone-photo OMR, geometric reasoning is far more robust than
+appearance-based classification trained on clean data.
+
+
+================================================================================
+1. INTRODUCTION
+================================================================================
+Vast quantities of music exist only as printed scores, with no machine-readable
+encoding. Optical Music Recognition (OMR)---the automatic conversion of score
+images into a symbolic format such as MIDI or MusicXML---unlocks playback,
+transposition, search, and accessibility for these works. While commercial OMR
+engines perform well on clean scanner output, the most common capture device
+today is a phone camera, which introduces perspective distortion, uneven
+illumination, shadows, and sensor noise. The gap between the clean documents
+that OMR systems are typically trained and evaluated on and the messy photos
+that users actually supply is, we argue, the dominant obstacle to practical OMR.
+
+This paper studies that gap directly. We build antiTranscription, a pipeline
+that takes a hand-held phone photo of monophonic printed sheet music and emits a
+MIDI file. It deliberately mixes classical geometric vision (rectification,
+Hough staff detection, morphological segmentation, geometric pitch inference)
+with a learned convolutional symbol classifier, so we can isolate which
+components survive the transition from clean training data to real photographs.
+
+Our experiments reveal a sharp dichotomy. The geometry-driven stages are robust:
+rectification succeeds on all five photos with sub-degree slant and staff
+detection recovers every stave. In contrast, the appearance-based classifier---
+trained to 58.9% on clean PrIMuS glyphs---drops to 22.7% on real photographic
+crops, a 36.2-point gap that is most severe for thin or hollow glyphs. This
+motivates a segmentation-free pitch reader that relies purely on notehead
+geometry and lifts exact pitch accuracy on a representative piece from 14% to
+86%.
+
+Contributions.
+(i)  A complete five-stage phone-photo-to-MIDI pipeline combining classical
+     geometry with a learned classifier.
+(ii) A robust rectification cascade and Hough/clustering staff detector
+     succeeding on 100% of our real test photos.
+(iii) A quantified clean-to-real domain-gap study for OMR symbol classification
+     (58.9% -> 22.7%) with per-class analysis of where appearance models break.
+(iv) A geometry-grounded, segmentation-free pitch reader that improves exact
+     pitch accuracy 6x (14% -> 86%) over that baseline.
+
+We scope the system to monophonic treble-clef scores without accidentals or key
+signatures, isolating perception from full musical parsing.
+
+
+================================================================================
+2. RELATED WORK
+================================================================================
+Classical OMR.
+Traditional OMR decomposes recognition into hand-designed stages: binarization,
+staff detection and removal, symbol segmentation, and musical reconstruction.
+Staff lines are located with projection profiles, run-length encoding, or the
+Hough transform, then removed morphologically so symbols can be isolated by
+connected components. Our geometry stages follow this lineage but are engineered
+for phone-capture distortion, adding a rectification front end and a
+spacing-consistency test for stave validation.
+
+Deep and end-to-end OMR.
+Recent work replaces the cascade with neural sequence models. Calvo-Zaragoza and
+Rizo introduced the PrIMuS corpus and a CRNN that transcribes a full monophonic
+staff end to end; van der Wel and Ullrich use a convolutional seq-to-seq model;
+Baro et al. extend these ideas to handwritten music; and object-detection
+formulations treat glyphs as boxes. We reuse PrIMuS as a source of clean
+training glyphs but, rather than a full sequence model, use a compact CNN as a
+controlled probe of how clean-trained features transfer to real photos.
+
+Domain shift.
+The gap between training and deployment distributions is central to vision;
+unsupervised domain adaptation aligns features across domains, and the OMR
+community has rendered synthetically distorted "camera" versions of PrIMuS to
+close it. We contribute an explicit, per-class measurement of the clean-to-real
+gap for phone-captured glyphs, and show that geometry-based pitch inference
+largely sidesteps it.
+
+
+================================================================================
+3. METHODOLOGY
+================================================================================
+The pipeline comprises five stages. We describe each below, emphasizing the
+formulas that govern the geometry.
+
+3.1 Perspective Rectification
+A phone photo is first warped to a fronto-parallel view. We binarize the page
+against the background with Otsu's method, which selects the threshold t* that
+maximizes the between-class variance:
+
+    [EQ 1]   t* = argmax_t  w0(t) w1(t) [mu0(t) - mu1(t)]^2
+
+where w_i and mu_i are the probability mass and mean of the two pixel classes
+split at t. From the page mask we estimate the four corners using a cascade of
+increasingly permissive detectors---Hough-line intersections, polygonal contour
+approximation, and a minimum-area rectangle---taking the first convex,
+sufficiently large quadrilateral. The corners define a homography H (3x3)
+mapping each source point x = (x, y, 1)^T to the rectified frame:
+
+    [EQ 2]   x'~ ~= H x~ ,    x' = (h11 x + h12 y + h13) / (h31 x + h32 y + h33)
+
+with y' defined analogously. We validate a rectification by measuring the
+residual slant of detected staff lines and the fraction of background pixels
+intruding on the page border.
+
+3.2 Staff Detection
+On the rectified page we adaptively threshold the image and run the Hough line
+transform, in which each edge point votes for the lines through it in the
+(rho, theta) parameterization:
+
+    [EQ 3]   rho = x cos(theta) + y sin(theta)
+
+Near-horizontal detections (theta ~= 90 degrees) are clustered by y-intercept
+and grouped into five-line staves. A group is a valid stave only if its
+inter-line spacings {d_k} are consistent, via the coefficient of variation:
+
+    [EQ 4]   CV = sigma_d / mu_d < 0.4
+
+The mean spacing s = mu_d becomes the fundamental length scale for all later
+stages.
+
+3.3 Staff Removal and Segmentation
+We erase the staff by suppressing thin horizontal ink runs, then bridge the gaps
+left in note stems with a vertical morphological closing of height ~= s. Symbols
+are extracted as connected components, filtered by area relative to s^2 to
+discard noise.
+
+3.4 Symbol Classification
+To label each glyph we train SymbolCNN, four convolution-batchnorm-pooling
+blocks plus two fully connected layers, on 64x64 binary crops mined from PrIMuS
+(35,933 crops, nine classes: whole/half/quarter/eighth notes, four rest types,
+and other). Because the class distribution is skewed, we minimize a weighted
+cross-entropy:
+
+    [EQ 5]   L = - sum_c w_c y_c log(y_hat_c),    w_c proportional to 1/sqrt(n_c)
+
+where n_c is the number of training crops of class c; the inverse-square-root
+weighting upweights rare glyphs without destabilizing training. Crops are paired
+with labels by a strict-discard rule that drops ambiguous alignments.
+
+3.5 Pitch Inference and a Geometry-Only Reader
+Given a notehead centroid at height y_head and the stave whose bottom line is at
+y_bottom, its vertical staff position (in half-spaces, the unit separating
+adjacent line/space positions) is:
+
+    [EQ 6]   p = round( (y_bottom - y_head) / (s/2) )
+
+In treble clef the bottom line is E4, so p maps deterministically to a diatonic
+pitch and hence a MIDI number, which we write out with note durations inferred
+from the classifier.
+
+Geometry-only pitch reader.
+Since Section 4 shows segmentation-plus-classification is the weak link, we build
+a segmentation-free reader. After filling hollow noteheads via a background
+connected-component test, we correlate the page with a synthetic filled-ellipse
+template T of size ~ s using normalized cross-correlation:
+
+    [EQ 7]   R(u,v) =
+       sum_ij ( I_uv(i,j) - mean(I_uv) ) ( T(i,j) - mean(T) )
+       / sqrt( sum_ij (I_uv(i,j) - mean(I_uv))^2  *  sum_ij (T(i,j) - mean(T))^2 )
+
+where I_uv is the patch under the template at (u,v). Peaks of R are reduced by
+greedy non-maximum suppression; clef-margin and vertically stacked
+(time-signature) detections are rejected; and a solidity gate---ink must survive
+a notehead-sized opening---removes rests and stems. Surviving peaks map to pitch
+by Eq. 6, using only staff geometry and notehead locations.
+
+
+================================================================================
+4. EXPERIMENTS AND RESULTS
+================================================================================
+Data.
+We evaluate on five hand-held phone photos of printed monophonic scores (Yankee
+Doodle, Twinkle Twinkle, Mary Had a Little Lamb, a CS 131 motif, and London
+Bridge). Four are carried through the full pipeline; London Bridge is a hard
+case (Section 4.4). For classification we mine 35,933 labelled 64x64 glyph crops
+from clean PrIMuS and reserve 20% for validation. Ground-truth pitch sequences
+were transcribed by hand.
+
+4.1 Geometry stages are robust
+Rectification succeeds on all five photos, leaving residual staff slant <= 0.22
+degrees and border intrusion <= 2.6%; two corner-estimation methods suffice
+(Table 1). Staff detection then recovers every stave on the four pipeline
+images---12 in total---at default Hough parameters, and morphological removal
+plus connected-component segmentation yields clean symbol candidates (last
+column).
+
+--- TABLE 1: Geometry front end ---
+Image            Method   Slant     Border   Staves   Symbols
+Yankee Doodle    Hough    0.22 deg  2.6%     4        94
+Twinkle Twinkle  PolyDP   0.20 deg  0.0%     3        68
+Mary Had a Lamb  Hough    0.07 deg  1.9%     2        45
+CS 131 motif     Hough    0.11 deg  1.1%     3        27
+Pass rate (rectification): 5/5
+Pass rate (staff detection): 4/4
+Caption: Geometry front end. Rectification residual slant and border intrusion,
+detected staves, and segmented symbol candidates. All staves are recovered at
+default parameters.
+
+4.2 The clean-to-real domain gap
+The learned classifier tells a very different story. SymbolCNN reaches 58.9%
+validation accuracy on clean PrIMuS glyphs, but the same model scores only 22.7%
+on 97 real photographic crops---a 36.2-point clean-to-real gap (Table 2). The
+collapse is class-dependent: quarter notes degrade gracefully (24.6%) and
+well-inked eighth notes survive (80%), but every hollow half note is
+misclassified (0/7) and the catch-all other class is never recovered (0/21). The
+reason is visible in the crops themselves: where clean PrIMuS glyphs are crisp
+and uniform, real photo crops suffer blur, broken stems, filled-in note holes,
+and residual staff lines that the clean-trained features never saw. This is the
+paper's central result: appearance-based recognition trained on clean engravings
+does not transfer to phone photos.
+
+--- TABLE 2: Domain-gap study for SymbolCNN ---
+Setting / Class             Crops   Accuracy
+PrIMuS validation (clean)   ---     58.9%
+Local phone crops (real)    97      22.7%
+  note_quarter              57      24.6%
+  note_eighth               10      80.0%
+  note_half                 7       0.0%
+  rest_quarter              2       0.0%
+  other                     21      0.0%
+Clean-to-real gap                   -36.2 pts
+Caption: Domain-gap study for SymbolCNN. A model that is near-60% accurate on
+clean glyphs drops below 23% on real photo crops, with hollow and catch-all
+classes failing entirely.
+
+4.3 End-to-end pitch and the geometry remedy
+The domain gap propagates to the full pipeline. On the segmentation-plus-
+classifier path, end-to-end pitch accuracy is low across all four pieces
+(Table 3): 8-14% exact and 17-50% within one step. Errors are dominated not by
+the pitch geometry of Eq. 6---exact when a notehead is correctly localized---but
+by upstream segmentation merges and misclassifications.
+
+The geometry-only reader changes the picture dramatically (Figure 1). On Yankee
+Doodle it localizes 26 of 28 noteheads and, under the standard alignment-based
+metric, reads 24/28 (86%) pitches exactly and 25/28 (89%) within one step---a
+six-fold gain over the baseline. Because pitch is read straight from notehead
+position via Eq. 6, the reader is exact whenever detection is correct; its only
+errors are two missed noteheads (a merged pair) and one localization slip. For
+phone-photo OMR, geometry generalizes where clean-trained appearance models do
+not.
+
+--- TABLE 3: End-to-end pitch accuracy ---
+                  Baseline (seg.+CNN)    Geometry-only
+Image             Exact    +/-1          Exact    +/-1
+Yankee Doodle     14%      50%           86%      89%
+Twinkle Twinkle   10%      19%           ---      ---
+Mary Had a Lamb   8%       23%           ---      ---
+CS 131 motif      8%       17%           ---      ---
+Caption: End-to-end pitch accuracy. The classifier-based baseline is weak; the
+segmentation-free geometry reader (Section 3.5) lifts exact accuracy on Yankee
+Doodle from 14% to 86%.
+
+--- FIGURE 1 (geometry_pitch.png) ---
+Caption: Geometry-only pitch reading on Yankee Doodle (Section 4.3). Left:
+template-matched noteheads, each labelled with the pitch inferred from staff
+geometry (green = exact, orange = within one step, red = wrong). Right: the
+detected melodic contour overlaid on ground truth (open circles mark the two
+undetected noteheads). The reader attains 24/28 (86%) exact and 25/28 (89%)
+within-one-step accuracy without any segmentation or classification.
+
+4.4 Diagnostics and Limitations
+Two dead ends proved instructive: aggressive stem-bridging can split beamed
+groups, and over-segmentation fragments a glyph---both mitigated by tying
+morphological kernels to the staff spacing s rather than absolute pixels. The
+clearest limitation is London Bridge, where a strong diagonal shadow biases the
+page mask, the corner cascade returns a rotated quadrilateral, and staff
+detection fails---pointing to shadow-aware binarization as future work.
+
+
+================================================================================
+5. CONCLUSION AND FUTURE WORK
+================================================================================
+We presented antiTranscription, a five-stage phone-photo-to-MIDI pipeline, and
+used it to study where OMR breaks under real capture. The lesson is clear: the
+geometric stages (rectification, Hough staff detection) transfer essentially
+perfectly to phone photos, whereas an appearance-based classifier trained on
+clean PrIMuS glyphs loses 36.2 points (58.9% -> 22.7%) on real crops, failing on
+thin and hollow shapes. Reframing pitch as geometric detection rather than
+segmentation-and-classification lifts exact accuracy on a representative piece
+from 14% to 86%. Future work should attack the gap at training time with
+synthetic camera distortions (Camera-PrIMuS) or feature-level adaptation, and
+extend the geometry-only reader to full transcription (duration, accidentals,
+key/time signatures, polyphony).
+
+Individual contributions.
+Completed individually by Yameen Sekandari: all five pipeline stages, classifier
+training, the domain-gap study, the geometry-only reader, and this report.
+
+
+================================================================================
+REFERENCES
+================================================================================
+[1]  A. Baro, P. Riba, J. Calvo-Zaragoza, and A. Fornes. From optical music
+     recognition to handwritten music recognition: A baseline. Pattern
+     Recognition Letters, 123:1-8, 2019.
+[2]  J. Calvo-Zaragoza and D. Rizo. End-to-end neural optical music recognition
+     of monophonic scores. Applied Sciences, 8(4):606, 2018.
+[3]  J. Calvo-Zaragoza, J. Hajic Jr, and A. Pacha. Understanding optical music
+     recognition. ACM Computing Surveys, 53(4):1-35, 2020.
+[4]  R. O. Duda and P. E. Hart. Use of the Hough transformation to detect lines
+     and curves in pictures. Communications of the ACM, 15(1):11-15, 1972.
+[5]  Y. Ganin and V. Lempitsky. Unsupervised domain adaptation by
+     backpropagation. In ICML, pages 1180-1189, 2015.
+[6]  R. Hartley and A. Zisserman. Multiple View Geometry in Computer Vision.
+     Cambridge University Press, 2 edition, 2004.
+[7]  Y. LeCun, L. Bottou, Y. Bengio, and P. Haffner. Gradient-based learning
+     applied to document recognition. Proceedings of the IEEE, 86(11):2278-2324,
+     1998.
+[8]  N. Otsu. A threshold selection method from gray-level histograms. IEEE
+     Transactions on Systems, Man, and Cybernetics, 9(1):62-66, 1979.
+[9]  A. Pacha, J. Hajic Jr, and J. Calvo-Zaragoza. A baseline for general music
+     object detection with deep learning. Applied Sciences, page 1488, 2018.
+[10] A. Rebelo, I. Fujinaga, F. Paszkiewicz, A. R. S. Marcal, C. Guedes, and
+     J. S. Cardoso. Optical music recognition: state-of-the-art and open issues.
+     International Journal of Multimedia Information Retrieval, 1(3):173-190,
+     2012.
+[11] S. Suzuki and K. Abe. Topological structural analysis of digitized binary
+     images by border following. Computer Vision, Graphics, and Image
+     Processing, 30(1):32-46, 1985.
+[12] E. van der Wel and K. Ullrich. Optical music recognition with convolutional
+     sequence-to-sequence models. In ISMIR, 2017.

@@ -1,0 +1,20 @@
+\section{Conclusion and Future Work}
+\label{sec:conclusion}
+
+I proposed a five-stage phone-photo-to-MIDI pipeline called
+\emph{antiTranscription}, and applied it to measure where OMR fails under actual
+capture conditions. I found that geometry-based pipeline components (rectification
+and Hough staff detection) transfer perfectly to phone photos, whereas an
+appearance-based classifier trained on pristine PrIMuS glyphs declines in
+accuracy by $36.2$ points ($58.9\%\!\rightarrow\!22.7\%$) on real captures and
+fails for thin and hollow glyphs. Treating pitch detection as geometry-based
+detection, as opposed to segmentation and classification, increases exact
+accuracy on an exemplar piece from $14\%$ to $86\%$. I plan to address the
+training gap through synthetic camera distortions (Camera-PrIMuS) and/or
+feature-level adaptation~\cite{ganin2015dann}, and to generalize the
+geometry-only reader to a full transcriber (including duration, accidentals, key
+and time signatures, and polyphony).
+
+\paragraph{Individual contributions.} Yameen Sekandari completed all five stages
+of the pipeline, classifier training, the domain-gap experiment, and the
+geometry-only reader, and wrote this paper.

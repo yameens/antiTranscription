@@ -33,11 +33,16 @@ results/
 # primus dataset (large, re-downloadable)
 package_aa/
 package_ab/
+data/primus/
 *.tgz
 
 # training crops and model checkpoint (generated, large)
 data/crops/
 data/best_model.pt
+data/crnn_best.pt
+data/crnn_camera.pt
+data/crnn_clean.pt
+data/seq_manifest.csv
 
 # cursor / agent tooling
 .cursor/

@@ -1,0 +1,66 @@
+% CVPR 2026 Paper Template; see https://github.com/cvpr-org/author-kit
+\documentclass[10pt,twocolumn,letterpaper]{article}
+
+%%%%%%%%% PAPER TYPE
+\usepackage[pagenumbers]{cvpr} % camera-ready style with page numbers
+
+% Import additional packages in the preamble file, before hyperref
+\input{preamble}
+
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{multirow}
+
+\definecolor{cvprblue}{rgb}{0.21,0.49,0.74}
+\usepackage[pagebackref,breaklinks,colorlinks,allcolors=cvprblue]{hyperref}
+
+% give two-column (figure*) floats more freedom so the results figure fits in body
+\renewcommand{\dbltopfraction}{0.92}
+\renewcommand{\dblfloatpagefraction}{0.7}
+\renewcommand{\topfraction}{0.92}
+\renewcommand{\textfraction}{0.07}
+\setcounter{dbltopnumber}{2}
+\setcounter{topnumber}{3}
+\setcounter{totalnumber}{5}
+
+% tighten float/caption spacing to keep the body within four pages
+\setlength{\abovecaptionskip}{3pt}
+\setlength{\belowcaptionskip}{0pt}
+\setlength{\textfloatsep}{8pt plus 2pt minus 2pt}
+\setlength{\dbltextfloatsep}{8pt plus 2pt minus 2pt}
+\setlength{\floatsep}{6pt plus 2pt minus 2pt}
+\setlength{\intextsep}{6pt plus 2pt minus 2pt}
+
+\def\paperID{CS131-2026}
+\def\confName{CVPR}
+\def\confYear{2026}
+
+%%%%%%%%% TITLE
+\title{From Phone Photo to MIDI: A Five-Stage Music Recognition Pipeline\\
+and a Study of the Clean-to-Real Domain Gap}
+
+\author{Yameen Sekandari\\
+Stanford University\\
+CS\,131: Computer Vision, Spring 2026\\
+{\tt\small yameen@stanford.edu}
+}
+
+\begin{document}
+\maketitle
+
+\input{sec/0_abstract}
+\input{sec/1_intro}
+\input{sec/2_related}
+\input{sec/3_method}
+\input{sec/4_results}
+\input{sec/5_conclusion}
+
+{
+    \small
+    \bibliographystyle{ieeenat_fullname}
+    \bibliography{main}
+}
+
+\end{document}

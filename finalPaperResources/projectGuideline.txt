@@ -1,0 +1,64 @@
+CS131 Final Project Guidelines
+Spring 2026
+
+The final project is your opportunity to apply the computer vision principles learned in class to a problem of your choice. Whether you want to dive deep into a specific algorithm (like 3D reconstruction or motion tracking) or apply CV to a hobby (like sports analytics or botany), the goal is creativity and technical rigor.
+Project Logistics
+Groups: You may work individually or in groups of up to 3. Expectations for scope and depth increase with group size.
+Mentor: Each group will be assigned a TA mentor to provide guidance.
+Submission: All components must be submitted via Gradescope.
+Deadlines:
+Project Proposal Due: Friday 5/15, 11:59 pm
+Project Milestone Due: Friday 5/22, 11:59 pm
+Final Demo Day Presentation Slides Due: Tuesday 6/2, 11:59 pm
+Final Demo Day: Monday 6/1 (virtual), Wednesday 6/3 (in-person) - Location and Time TBA on Ed
+Final Project Report Due: Saturday 6/6, 11:59 pm
+
+
+Component 1: Project Proposal (5%)
+Format: 1-page PDF, submitted via Gradescope.
+Goal: Define a clear problem, state your proposed methodology, and identify initial steps.
+Rubric (5% total):
+Problem Statement & Originality (2%): Originality and creativity in the chosen problem with clear and concise descriptions. Is the problem well-defined and creative?
+Proposed Methodology (2%): Coherence and clarity in the proposed approach. Appropriateness of the methodology for the problem. Is the technical approach sound and relevant to CS 131?
+Feasibility & Timeline (1%): A realistic and achievable timeline with objectives. Can this realistically be completed in ~4 weeks?
+Component 2: Project Milestone (5%)
+Format: 2-page PDF, submitted via Gradescope.
+Goal: Summarize your achievements and any deviations from the original proposal. Showcase an intermediate result through visualization. Provide an updated timeline and objectives.
+Rubric (5% total): 
+Technical Progress (2%): Substantive evidence of implementation such as data processing, feature extraction, or initial model results. Is the progress technically sound and aligned with the proposal?
+Visualization & Results (2%): Clear and insightful visualizations of intermediate outputs. Does the visual evidence demonstrate early data exploration, a functional pipeline or identify specific areas for improvement?
+Updated Timeline & Plan (1%): A refined schedule for the remaining tasks including any pivots from the original scope. Is the roadmap to the final submission realistic and well-defined?
+Component 3: Demo Day & Final Report (30%)
+A. Demo Day Presentation
+Format: 4 minute oral presentation with visual aids (e.g., slides, demos). Submit your final demo day presentation slides on Gradescope.
+Content: Overview of the project, methodology, results, and learnings.
+Rubric:
+Clarity of Problem Statement and Proposed Methodology (7%): 
+Clarity of Results, Analysis, and Discussion (7%)
+Quality of Presentation (6%)
+B. Final Report
+Format: 4-page PDF using the CVPR LaTeX template.
+Structure: 
+Introduction: Motivation, significance, and challenges of the chosen problem.
+Related Work: Discuss related research and differentiate your approach.
+Methodology: Detail your methods, algorithms, and models used.
+Results: Present your findings with quantitative and qualitative analysis.
+Conclusion: Summarize your findings, their implications, and potential future work.
+Individual Contributions: For group projects, clearly state each member's contributions (what code each one wrote, experiments run, etc).
+Rubrics:
+Introduction and Motivation (5%)
+Depth of Research and Related Work (10%)
+Methodology and Technical Rigor (10%)
+Results, Analysis, and Discussion (20%)
+Writing Quality and Organization (5%)
+
+
+
+Notes:
+You may choose to work individually or in a group (up to 3 members).
+No late dates can be applied to the Demo Day Slides and Final Report.
+Please have only one group member submit the proposal and select the other group members during submission.
+Group members must contribute equally. For teams with 3 people, the project will be graded with higher expectations and should demonstrate clear contributions from all 3 students.
+Please email your TA mentor directly for project-specific questions and guidance. For general questions related to computer vision, please use Ed, come to TA office hours, or book office hours with Professors Niebles and Gaidon.
+You are free to use any programming language and libraries. Proper citations and acknowledgments are required.
+If you have a time conflict for the 6/3 Demo Day, please email Gaby (gadias@stanford.edu) by 5/22.

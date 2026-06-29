@@ -1,0 +1,23 @@
+%% abstract
+\begin{abstract}
+I introduce \emph{antiTranscription}, an end-to-end computer-vision pipeline for
+converting a casual smartphone photo of printed sheet music into a playable MIDI
+file. My system consists of five learned and traditional steps: (i) a
+homography-based perspective rectification using a reliable page-corner cascade;
+(ii) Hough-transform staff-line detection coupled with a five-line clustering
+algorithm; (iii) morphological staff removal followed by connected-component
+symbol segmentation; (iv) a trained convolutional neural network for glyph
+recognition, on a $35{,}933$-example crop set derived from the PrIMuS
+corpus~\cite{calvo2018primus}; and (v) geometric pitch reading and MIDI
+synthesis. I find that the geometry steps are extremely reliable on five real
+phone photos (rectification passes on all five with slant below $0.22^{\circ}$;
+staff detection on all pages), while my main contribution shows a large
+\emph{clean-to-real} domain gap: the classifier that achieves $58.9\%$ on clean
+glyphs falls to $22.7\%$ on real-cropped glyphs, a drop of $36.2$ points,
+primarily concentrated on delicate symbols like hollow half notes (recognized
+with $0\%$ accuracy). This motivates my approach of using a geometry-grounded,
+segmentation-free notehead-localization and pitch reader that I show improves
+exact pitch accuracy from $14\%$ to $\mathbf{86\%}$ on a test song ($89\%$ within
+one step). OMR using geometric reasoning is much more promising for phone images
+than an appearance-based classifier trained on clean data.
+\end{abstract}
